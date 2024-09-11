@@ -4,23 +4,42 @@ import wollok.game.*
 object pepita {
 
 	var property energia = 100
-	var property position = game.origin()
+	var position = game.at(3,3)
 
-	method image() {
-		return if (self.estaEnElNido()) "pepita-grande.png" else "pepita.png"
+	method position() = position
+
+	method position(arg){
+		self.irA(arg)
+//		game.say(pepita,"cambio posicion: " + position.x() + " - " + position.y())
+		game.say(pepita,"energia actual: " + energia)
+
 	}
+	method image() =
+		"pepita" + self.parteDelNombreDelArchivoSegunUbicacion() + self.parteDelNombreDelArchivoSegunCansancio() + ".png"
+//		"pepita" + (if (self.estaEnElNido()) "-grande" else "") + ".png"
+//		if (self.estaEnElNido()) "pepita-grande.png" else "pepita.png"
+
+  	method parteDelNombreDelArchivoSegunCansancio() = 
+		if (self.estaCansada()) "-gris" else ""
+
+	method parteDelNombreDelArchivoSegunUbicacion() = 
+	    if (self.estaEnElNido()) "-grande" else ""
 
 	method come(comida) {
 		energia = energia + comida.energiaQueOtorga()
+		game.removeVisual(comida)
 	}
+
 
 	method vola(kms) {
 		energia = energia - kms * 9
 	}
 
 	method irA(nuevaPosicion) {
-		self.vola(position.distance(nuevaPosicion))
-		position = nuevaPosicion
+		if(not self.estaCansada()) {
+			self.vola(position.distance(nuevaPosicion))
+			position = nuevaPosicion
+		}
 	}
 
 	method estaCansada() {
@@ -29,7 +48,11 @@ object pepita {
 
 	method estaEnElNido() {
 		
-		return false // Reemplazar por el código correcto
+		return position == nido.position()
+	}
+	method comeLoQueHayaSiEsQueHayAlgo() {
+		if(not game.colliders(self).isEmpty())
+			game.uniqueCollider(self).interactuar(pepita)
 	}
 
 }
